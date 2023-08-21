@@ -15,5 +15,19 @@ services:
   mongo:
     command: mongod
     image: mongo:4.0.0
+    ports:
+      - $DB_PORT:$DB_PORT
+
+  rabbitmq:
+    image: rabbitmq:management
+    env_file: ".env"
+    hostname: $AMQP_HOST
+    environment:
+      - RABBITMQ_NODE_PORT=$AMQP_PORT
+      - RABBITMQ_DEFAULT_USER=$AMQP_USER
+      - RABBITMQ_DEFAULT_PASS=$AMQP_PASSWORD
+    ports:
+      - 15672:15672              # web ui
+      - $AMQP_PORT:$AMQP_PORT    # debug
 
 version: '3.7'
