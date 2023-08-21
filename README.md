@@ -176,6 +176,49 @@ agent:
 ```
 **NOTE:** treat your Telegram token as a secret and do not commit it to public repositories!
 
+#### Message queue gateway
+Gateway prototype and message queue instance could be started with docker compose. You'll need to provide several environment parameters in order for this thing to work. All Hosts should be reachable within docker network. Example could be pasted as is.
+```
+# Message queue hosthame, port and credentials
+AMQP_HOST=myrabbitmq
+AMQP_PORT=5672
+AMQP_USER=myuser
+AMQP_PASSWORD=mypassword
+# Location of service we gateway delegates requests to
+SERVICE_HOST_BADLISTED_WORDS="badlisted-words:8018"
+SERVICE_HOST_SPACY_NOUNPHRASES="spacy-nounphrases:8006"
+# Also gateway reuses mongo to save messages
+DB_HOST=mongo
+DB_PORT=27017
+``` 
+
+To test new interface you'll need to start docker cluster with
+```
+docker compose -f docker-compose.yml -f assistant_dists/dream_script_based/docker-compose.override.yml -f assistant_dists/dream_script_based/dev.yml up --build badlisted-words spacy-nounphrases rabbitmq mongo gateway
+```
+then visit `http://localhost:15672/#/exchanges/%2F/amq.default`, send message with routing key `gateway.input` and payload of special format
+```
+{
+    "method": "post",
+    "delegate_service": "badlisted_words",
+    "path": "badlisted_words",
+    "body": {
+        "sentences": ["any fucks in this sentence", "good one", "fucked one"]
+    }
+}
+```
+where `delegate_service` is a service name `method` and `path` are http method and path where service endpoint resides and `body` represents json that service requires. You can set optional `correlation_id` in properties field to track response message that will match. You can receive messages here `http://localhost:15672/#/queues/%2F/gateway.output` in `Get messages` dropdown. `Automatic ack` mode is advised, otherwise you will always receive first message in the queue that will never dissapear.
+
+Spacy annotator service also available:
+```
+{
+    "method": "post",
+    "delegate_service": "spacy_nounphrases",
+    "path": "respond",
+    "body": {"sentences": ["джейсон стетхэм хочет есть."]}
+}
+```
+
 # Configuration and proxy usage
 
 Dream uses several docker-compose configuration files:
