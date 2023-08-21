@@ -25,9 +25,7 @@ class AmqpSettings(BaseSettings):
 
 @lru_cache
 def amqp() -> AmqpSettings:
-    return AmqpSettings(
-        host="localhost"  # FIXME
-    )
+    return AmqpSettings()
 
 
 class DelegateServicesSettings(BaseSettings):
@@ -38,10 +36,7 @@ class DelegateServicesSettings(BaseSettings):
 
 @lru_cache
 def services() -> DelegateServicesSettings:
-    return DelegateServicesSettings(
-        badlisted_words="localhost:8018",    # FIXME
-        spacy_nounphrases="localhost:8006"
-    ) 
+    return DelegateServicesSettings() 
 
 
 class MongoSettings(BaseSettings):
@@ -52,9 +47,7 @@ class MongoSettings(BaseSettings):
 
 @lru_cache
 def mongo() -> MongoSettings:
-    return MongoSettings(
-        host="localhost"
-    )
+    return MongoSettings()
 
 
 def validate_delegate_service_name(service_name: str):

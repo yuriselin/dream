@@ -30,4 +30,11 @@ services:
       - 15672:15672              # web ui
       - $AMQP_PORT:$AMQP_PORT    # debug
 
+  gateway:
+    env_file: ".env"
+    build: ./gateway
+    # otherwise we would need to solve
+    # starting order and non-trivial waiting
+    restart: unless-stopped
+
 version: '3.7'
